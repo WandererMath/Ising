@@ -12,16 +12,15 @@ using namespace std;
 const int X = 100;
 const int Y = 100;
 const int total = X * Y;
-const int initial = 3;
-const int N = 100000;//1e6
+const int initial = 2;
+const int N = 100000;
 
-float T = 1;//0.001
+float T = 1;
 float J = 1;
 float H = 0;
 bool S[X][Y];
 int num_up = 0;
 float scale = 7;
-//float progress[100000];
 vector<double> pp(N);
 
 
@@ -106,6 +105,7 @@ void timer(int value) {
 int main(int argc, char** argv)
 {
 	init();
+	cin >> T;
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(scale * 100, scale * 100);

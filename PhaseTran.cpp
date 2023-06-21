@@ -6,15 +6,13 @@
 #include <time.h>
 #include <cmath>
 #include <vector>
-#include <GL/glut.h>
-#include "matplotlibcpp.h"
-namespace plt = matplotlibcpp;
+#include <fstream>
 using namespace std;
 
 const int X = 100;
 const int Y = 100;
 const int total = X * Y;
-const int initial = 3;
+const int initial = 2;
 const int N = 100000;
 
 float T = 2.2;
@@ -22,16 +20,13 @@ float J = 1;
 float H = 0;
 bool S[X][Y];
 int num_up = 0;
-vector<double> pp(N);
+vector<float> U(1000);
+float energy=0;
 
 
 #define M_RATIO ((float)num_up/total-0.5)*2
 
-float absolute(float a) {
-	if (a > 0)
-		return a;
-	return -a;
-}
+
 void init() {
 	srand(time(NULL));
 	for (int i = 0; i < X; i++) {
@@ -67,11 +62,18 @@ void flip() {
 	y = rand() % Y;
 	E = dE(x, y);
 	if (E < 0 || (float)rand() / RAND_MAX < exp(-E / T)) {
+		energy += E;
 		S[x][y] = !S[x][y];
 		if (S[x][y])
 			num_up += 1;
 		else
 			num_up -= 1;
+	}
+}
+
+void mc(int N) {
+	for (int i = 0; i < N; i++) {
+		flip();
 	}
 }
 
@@ -101,60 +103,58 @@ void flip_cluster() {
 void mc_wolff(int N) {
 	for (int i = 0; i < N; i++) {
 		flip_cluster();
-		pp.at(i) = (M_RATIO);
-	}
-}
-void mc(int N) {
-	for (int i = 0; i < N; i++) {
-		flip();
 	}
 }
 
-
-//function to print simulation steps
-int main2() {
-	init();
-	for (int i = 0; i < N; i++) {
+void wolff(int N=2000) {
+	for (int i = 0; i < 2000; i++) {
 		flip_cluster();
-		pp.at(i) = M_RATIO;
 	}
-	plt::plot(pp);
-	plt::xlabel("Simulation Steps");
-	plt::ylabel("Magnetization per Spin");
-	plt::title("T=2.2  Wolff");
-	plt::save("D:/Results2/MC22_Wolffa.jpg", 300);
-	plt::show();
-	return 0;
 }
 
-//main function for magnetization at different temperatures
-//Wolff Algorithm is used when temperature is near critical temperature
-int main()
-{
+int main1() {
 	init();
-	vector<double> Temperatures(500);
-	vector<double> Ratios(500);
-	T = 0.03;
-	for (int i = 0; i < 500; i += 1) {
-		
-		if (T > 2.2 && T < 2.4) {
-			for (int i = 0; i < 2000; i++) {
-				flip_cluster();
-			}
-			cout << i;
-		}
-		else {
-			mc(N);
-		}
-		Temperatures.at(i) = T;
-		Ratios.at(i) = absolute(M_RATIO);
+	T = 0.5;
+	mc(500000);
+	energy = 0;
+	int i = -1;
+
+	fstream f("Results.txt", ios::out );
+	while (T < 4) {
 		T += 0.01;
+		i += 1;
+
+		mc(N);
+		U.at(i) = energy;
+		f << T << "\t" << energy << endl;
+
 	}
-	plt::xlabel("Temperature");
-	plt::ylabel("Magnetization per Spin");
-	plt::scatter(Temperatures, Ratios);
-	plt::save("D:/Results2/MW-T.png", 300);
-	plt::show();
+	f.close();
 
 	return 0;
 }
+
+int main() {
+	init();
+	T = 0.5;
+	mc(500000);
+	energy = 0;
+	int i = -1;
+
+	fstream f("Results.txt", ios::out);
+	while (T < 4) {
+		T += 0.01;
+		i += 1;
+		if (T >= 2.2 && T < 2.4)
+			wolff();
+		else
+			mc(N);
+		U.at(i) = energy;
+		f << T << "\t" << energy << endl;
+
+	}
+	f.close();
+
+	return 0;
+}
+
