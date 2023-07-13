@@ -24,7 +24,7 @@ vector<float> U(1000);
 float energy=0;
 
 
-#define M_RATIO ((float)num_up/total-0.5)*2
+#define M_RATIO (float)num_up/total
 
 
 void init() {

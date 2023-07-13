@@ -1,4 +1,5 @@
 #pragma once
+#pragma comment(linker, "/STACK:8000000")
 
 #include <iostream>
 #include <stdlib.h>
@@ -15,15 +16,15 @@ const int X = 100;
 const int Y = 100;
 const int total = X * Y;
 const int initial = 3;
-const int N = 100000;
+const int N = 1000000;
 
-float T = 2.2;
+float T = 2.3;
 float J = 1;
 float H = 0;
 bool S[X][Y];
 int num_up = 0;
 vector<double> pp(N);
-
+vector<double> pv(N);
 
 #define M_RATIO ((float)num_up/total-0.5)*2
 
@@ -34,6 +35,7 @@ float absolute(float a) {
 }
 void init() {
 	srand(time(NULL));
+	num_up = 0;
 	for (int i = 0; i < X; i++) {
 		for (int j = 0; j < Y; j++) {
 			S[i][j] = rand() % initial;
@@ -82,16 +84,20 @@ void flip_wolff(int x, int y) {
 		num_up += 1;
 	S[x][y] = !S[x][y];
 	for (auto i : { -1, 1 }) {
-		for (auto j : { -1, 1 }) {
-			if (x + i < 0 || x + i >= X || y + j < 0 || y + j >= Y)
-				continue;
-			if (S[x][y] != S[x + i][y + j] && (float)rand() / RAND_MAX < exp(-2 * J / T)) {
-				flip_wolff(x + i, y + j);
-			}
+		if (x + i < 0 || x + i >= X)
+			continue;
+		if (S[x][y] != S[x + i][y] /*) {//*/ && (float)rand() / RAND_MAX < 1 - exp(-2 * J / T)) {
+			flip_wolff(x + i, y);
+		}
+	}
+	for (auto i : { -1, 1 }) {
+		if (y + i < 0 || y + i >= Y)
+			continue;
+		if (S[x][y] != S[x][y + i] /*) {//*/ && (float)rand() / RAND_MAX < 1 - exp(-2 * J / T)) {
+			flip_wolff(x, y + i);
 		}
 	}
 }
-
 void flip_cluster() {
 	int x = rand() % X;
 	int y = rand() % Y;
@@ -107,29 +113,39 @@ void mc_wolff(int N) {
 void mc(int N) {
 	for (int i = 0; i < N; i++) {
 		flip();
+		pv.at(i) = M_RATIO;
+		//cout << M_RATIO<<endl;
 	}
+	
 }
 
 
-//function to print simulation steps
-int main2() {
+
+int main() {
+	cout << "GOOD";
 	init();
+	T = 1;/*
 	for (int i = 0; i < N; i++) {
+		//cout << "OK";
 		flip_cluster();
 		pp.at(i) = M_RATIO;
-	}
-	plt::plot(pp);
+	}*/
+	//plt::named_plot( "Wolff", pp);
+	//cout << "Nice";
+	init();
+	mc(N);
+	plt::named_plot("Non-Wolff", pv);
+	//plt::legend();
 	plt::xlabel("Simulation Steps");
 	plt::ylabel("Magnetization per Spin");
-	plt::title("T=2.2  Wolff");
-	plt::save("D:/Results2/MC22_Wolffa.jpg", 300);
+	plt::title("T=1 Non-Wolff");
+	plt::save("D:/Tasks/CMS/R1/P6.jpg", 300);
 	plt::show();
 	return 0;
 }
 
-//main function for magnetization at different temperatures
-//Wolff Algorithm is used when temperature is near critical temperature
-int main()
+
+int main2()
 {
 	init();
 	vector<double> Temperatures(500);
@@ -153,7 +169,7 @@ int main()
 	plt::xlabel("Temperature");
 	plt::ylabel("Magnetization per Spin");
 	plt::scatter(Temperatures, Ratios);
-	plt::save("D:/Results2/MW-T.png", 300);
+	plt::save("D:/Tasks/R1/P1.jpg", 300);
 	plt::show();
 
 	return 0;

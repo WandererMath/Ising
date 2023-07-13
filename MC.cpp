@@ -80,7 +80,7 @@ void mc(int N) {
 	}
 }
 
-//main function for magnetization at different temperatures
+
 int main0()
 {
 	init();
@@ -103,7 +103,6 @@ int main0()
 	return 0;
 }
 
-//function to print simulation steps
 int main() {
 	init();
 	T = 2.2;

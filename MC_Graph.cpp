@@ -12,15 +12,16 @@ using namespace std;
 const int X = 100;
 const int Y = 100;
 const int total = X * Y;
-const int initial = 2;
-const int N = 100000;
+ int initial = 2;
+const int N = 100000;//1e6
 
-float T = 1;
+float T = 1;//0.001
 float J = 1;
 float H = 0;
 bool S[X][Y];
 int num_up = 0;
 float scale = 7;
+//float progress[100000];
 vector<double> pp(N);
 
 
@@ -40,9 +41,9 @@ void init() {
 
 float dE(int i, int j) {
 	float sum = 0;
-	for (auto m : { -1, 1 }) {
-		for (auto n : { -1, 1 }) {
-			if (i + m < 0 || i + m >= X || j + n < 0 || j + n >= Y)
+	for (auto m : { -1,0, 1 }) {
+		for (auto n : { -1,0, 1 }) {
+			if (i + m < 0 || i + m >= X || j + n < 0 || j + n >= Y|| ( ((bool)m| (bool)n)==0 || ((bool)m & (bool)n)!=0))
 				continue;
 			if (S[i + m][j + n] == S[i][j]) {
 				sum += 2 * J;
@@ -105,7 +106,10 @@ void timer(int value) {
 int main(int argc, char** argv)
 {
 	init();
+	cout << "T:";
 	cin >> T;
+	cout << "Init: ";
+	cin >> initial;
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(scale * 100, scale * 100);

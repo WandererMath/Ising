@@ -1,4 +1,5 @@
 #pragma once
+#pragma comment(linker, "/STACK:8000000")
 
 #include <iostream>
 #include <stdlib.h>
@@ -13,14 +14,15 @@ const int X = 100;
 const int Y = 100;
 const int total = X * Y;
 const int initial = 2;
-const int N = 100000;
+const int N = 100000;//1e6
 
-float T = 2;
+float T = 2.4;//0.001
 float J = 1;
 float H = 0;
 bool S[X][Y];
 int num_up = 0;
 float scale = 7;
+//float progress[100000];
 vector<double> pp(N);
 
 
@@ -73,12 +75,17 @@ void flip() {
 void flip_wolff(int x, int y) {
 	S[x][y] = !S[x][y];
 	for (auto i : { -1, 1 }) {
-		for (auto j : { -1, 1 }) {
-			if (x + i < 0 || x + i >= X || y + j < 0 || y + j >= Y)
-				continue;
-			if (S[x][y] != S[x + i][y + j] && (float)rand()/RAND_MAX<exp(-2*J/T)) {
-				flip_wolff(x+i, y+j);
-			}
+		if (x + i < 0 || x + i >= X)
+			continue;
+		if (S[x][y] != S[x + i][y]  && (float)rand() / RAND_MAX <1- exp(-2 * J / T)) {
+			flip_wolff(x + i, y);
+		}
+	}
+	for (auto i : { -1, 1 }) {
+		if (y + i < 0 || y + i >= X)
+			continue;
+		if (S[x][y] != S[x][y+i] && (float)rand() / RAND_MAX < 1-exp(-2 * J / T)) {
+			flip_wolff(x, y+i);
 		}
 	}
 }
@@ -118,7 +125,7 @@ void timer(int value) {
 
 
 	glutPostRedisplay();
-	glutTimerFunc(1, timer, 0);
+	glutTimerFunc(50, timer, 0);
 }
 
 int main(int argc, char** argv)
@@ -128,7 +135,7 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 	glutInitWindowSize(scale * 100, scale * 100);
-	glutCreateWindow("MC");
+	glutCreateWindow("Wolff");
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
